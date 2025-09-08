@@ -6,8 +6,8 @@ Some fun facts about me:
 2. I love listening to borderline-annoying music.
 3. I visualize the days of the week as a counter clockwise cycle.
 
-![picture of me](portrait.jpg)
+![picture of me](fish.gif)
 
 
 # Table of Contents
-[Link to Assignment 1](assignments/assignment1.md)
+* [Assignment 1](assignments/assignment1.md)
