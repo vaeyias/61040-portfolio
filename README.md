@@ -12,3 +12,4 @@ Some fun facts about me:
 # Table of Contents
 * [Assignment 1](assignments/assignment1.md)
 * [Problem Set 1](psets/ps1.md)
+* [Problem Set 2](psets/ps2.md)
