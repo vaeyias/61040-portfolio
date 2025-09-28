@@ -85,7 +85,6 @@ concept ExpenseTracking
             a set of Debts
             a set of Expenses
 
-
         a set of GroupExpenses
             a title String
             a description String
@@ -108,7 +107,6 @@ concept ExpenseTracking
             requires creator exists
             effect creates a new group with the given groupName, the creator, the set of users, the description, and the startDate/endDate set to None.
 
-
         leaveGroup(group:Group, user:User):
             requires group exists, user is part of group, and user does not owe/is not owed anything in the group
             effect removes the user from the group
@@ -124,7 +122,6 @@ concept ExpenseTracking
         addExpense(payer:User, title:String, description:String, category: String, totalCost: Number, date:Date, debtMapping: Map<User:Number>):(expense:GroupExpense)
             requires creator exists, totalCost is positive, the values (costs) of the debtMapping add up to the totalCost and all values are positive numbers.
             effect: calls createPersonalExpense for every debt in the debtMapping with given group, category, date, user user in the mapping as the user, and the number the user maps to as the personalCost. Also, creates a GroupExpense with given payer, title, description category, totalCost, date, and the set of PersonalExpenses just created. Updates group's startDate/endDate based on the given date.
-
 
         deleteExpense(payer: User, group:Group, groupExpense: GroupExpense): (groupExpense:GroupExpense)
             requires payer and expense to exist, payer is the payer of the expense, and expense is in group.
@@ -149,7 +146,6 @@ concept ExpenseTracking
         getUserSpending(user:User,group:Group):(spending:Number)
             requires user and group to exist, user is in group
             effect gets all the PersonalExpenses associated with the user in the group, adds them up, and returns them.
-
 ```
 
 ```
@@ -174,9 +170,6 @@ concept Debts [User]
         getDebt(user:User, otherUser:User, group:Group): (debt:Debt)
             requires user, otherUser, and group exists and a debt between the three to exist
             effect returns the amount that the user owes the other user. If the number is negative, then the otherUser owes the user.
-
-
-
 ```
 
 ```
@@ -215,12 +208,9 @@ concept BudgetTracking
             requires expense to exist and a budget with the user, group, category, and date to exist (date is within the start and end date of a budget).
             effect for each budget associated with the user, group, category, and date of the given expense, update the totalSpent to subtract the cost of the given expense.
 
-
         checkBudget (user:User, budget: Budget) : (budget: Budget)
             requires budget to exist and user is associated with the budget
             effect returns how much the user has spent and how much the user has left of the budget.
-
-
 ```
 
 ```
@@ -244,7 +234,6 @@ concept Friends
         getFriends(user:User):
             requires user to exist
             effect gets all the friendships associated with the user. If no friendships with the user exist, return none
-
 ```
 
 
@@ -271,7 +260,7 @@ concept Folder
             requires user, folder and group exists. folder belongs to user, user is in the group, and group is inside folder
             effect removes the group from the folder
 
-        deleteFolder(user:User,folder:Folder):
+        deleteFolder(user:User, folder:Folder):
             requires user and folder exists. folder belongs to user
             effect deletes the folder and moves all groups to the home page (no inside any folder)
 
@@ -351,7 +340,10 @@ sync addSharedGroupToDash
 ### Concepts in Context
 Each concept in Moneta plays a distinct role in supporting expense management while interacting with others through synchronizations. Authentication establishes the identity of users and controls access to other concepts: only authenticated users can create or join groups, add expenses, or view debts. Users must be part oa a group to view the group. ExpenseTracking provides the core structure for organizing expenses, grouping them by trips or activities. Debts ensures that shared expenses are fairly distributed by mapping payers to receivers, and is automatically updated whenever a new expense is added. BudgetTracking supports financial awareness by maintaining user and group budgets, which are updated when expenses are logged, and triggers notifications when limits are exceeded. The Friendship system makes it easier to form groups and share expenses. Finally, Folders provides a customizable organizational layer, letting users sort groups or budgets in ways that suit their personal preferences. When a group is created, it is automatically added to each associated user's dashboard. The User type in all concepts come from Authentication.
 
-The User type contains
+## UI Sketches
+![UI_sketch](/assets/sketches.jpeg)
+
+
 ## User Journey
 
 Jay is planning a summer trip to Southeast Asia with four friends. In the past, handling money on group trips has always been stressful for him, especially since he is the primary organizer and often fronts large payments. Without knowing how much he spent on himself, Jay tends to overspend, thinking most of his money went toward covering others. Determined to simplify things, Jay suggests using Moneta to manage shared costs and track personal expenses.
