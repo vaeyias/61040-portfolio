@@ -13,3 +13,4 @@ Some fun facts about me:
 * [Assignment 1](assignments/assignment1.md)
 * [Problem Set 1](psets/ps1.md)
 * [Problem Set 2](psets/ps2.md)
+* [Assignment 2](assignments/assignment2.md)
