@@ -128,7 +128,6 @@ concept GroupExpenseTracking
 ```
 
 ```
-
 concept PersonalExpenseTracking
     purpose allows users to track their own share of expenses, either within a group or individually
     principle each personal expense belongs to a user and records how much they owe or paid for a given item
