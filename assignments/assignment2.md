@@ -41,15 +41,15 @@ Managing shared and personal expenses during trips often leads to confusion over
 
 ### Key Features
 1. **Expense Tracker**
-Allows users to track both personal and group expenses. Users can create expense groups and invite others to collaborate, or use a group solely for personal tracking. When adding an expense, users can specify the category, who paid, and who was covered, making it easy to keep track of spending and shared costs. This lets users clearly see who owes whom what.
+Allows users to track both personal and group expenses. Users can create expense groups and invite others to collaborate, or use a group solely for personal tracking. When adding an expense, users can specify the category, who paid, and who was covered, making it easy to keep track of spending and shared costs. Group members gain clarity and transparency, while trip organizers save time and avoid stress when managing reimbursements.
 
 2. **Budget Manager**
-Lets users set and manage budgets at different levels—per group, by category, or overall. The app tracks spending across all groups and supports recurring budgets for things like weekly groceries or regular bills, helping users stay on top of their finances. If users choose to share their budgets in a group, this can help groups manage their spending more effectively.
+Lets users set and manage budgets at different levels—per group, by category, or overall. Moneta calculates spending with both personal and shared expenses, making it easy to see how much each person has actually spent!
 
 2. **Organization Dashboard**
-Serves as the central hub for organizing expenses across all groups. Users can create custom folders for different groups or time periods, like "Summer 2025". This structure makes it easy to keep a well-organized historical record of past and current expenses, tailored to each user’s preferred way of organizing information.
+Serves as the customizable hub for organizing expense groups. Users can create custom folders for different groups or time periods, like "Summer 2025". This structure makes it easy to keep a well-organized historical record of past and current expenses, tailored to each user’s preferred way of organizing information.
 
-**Moneta** reduces stress and saves time for both trip organizers and participants. By keeping expenses transparent and organized, it prevents disputes and simplifies reimbursements. With clear budget tracking, users can easily monitor their spending and stay within their limits
+**Moneta** reduces stress and saves time for both trip organizers and participants. By keeping expenses transparent and organized, it prevents disputes and simplifies reimbursements. With clear budget tracking, users can easily monitor their spending and stay within their limits.
 
 
 ## Concept Design
