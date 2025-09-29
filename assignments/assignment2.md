@@ -155,7 +155,7 @@ concept PersonalExpenseTracking
             requires user and expense exists and user is the payer of the expense
             effect deletes the PersonalExpense
 
-        deleteAllPersonalExpense(user:User, group:GroupExpense):(expense:PersonalExpense)
+        deleteAllPersonalExpense(user:User, group:GroupExpense):
             requires user and groupExpense exists and user is the payer of the expense
             effect deletes all PersonalExpenses associated with the group
 
@@ -256,7 +256,7 @@ concept Friends
 ```
 concept Folder
     purpose allows users to organize groups into custom structures
-    principle
+    principle after a user creates a folder, the user can add or remove groups to the folders.
     state
         a set of Folders with
             a parent Folder
@@ -286,57 +286,74 @@ concept Folder
 ```
 
 ### syncs
+
 ```
-sync CreatePersonalExpensesFromGroup
+sync createHomeFolder
+    when Authentication.register():(user:User)
+    then Folder.createFolder(user:user,name:"home")
+```
+```
+sync addGroupToDash
+    when GroupExpenseTracking.createGroup(creator):(group:Group)
+    then Folder.addToFolder(group:group, user:creator, folderName:"home")
+```
+```
+sync addSharedGroupToDash
+    when GroupExpenseTracking.addUser(friend):(group:Group)
+    then Folder.addToFolder(group:group, user:friend, folderName:"home")
+```
+
+```
+sync createPersonalExpensesFromGroup
     when GroupExpenseTracking.addGroupExpense(debtMapping:Map<User:Number>):(groupExpense:GroupExpense)
     then for each (user, cost) in debtMapping
         PersonalExpenseTracking.createPersonalExpense(user=user, payer=groupExpense.payer, title=groupExpense.title, group=groupExpense.group, category=groupExpense.category, date=groupExpense.date, personalCost=cost)
 ```
 
 ```
-sync DeletePersonalExpensesFromGroup
+sync deletePersonalExpensesFromGroup
     when GroupExpenseTracking.deleteGroupExpense(groupExpense)
     then PersonalExpenseTracking.deleteAllPersonalExpense(groupExpense)
 ```
 
 ```
 sync trackSpending
-    when ExpenseTracking.createPersonalExpense(): (expense:PersonalExpense):
+    when PersonalExpenseTracking.createPersonalExpense(): (expense:PersonalExpense):
     then BudgetTracker.addTotalSpent(expense)
 ```
 
 ```
 sync removeSpending
-    when ExpenseTracking.deletePersonalExpense(): (expense:PersonalExpense):
+    when PersonalExpenseTracking.deletePersonalExpense(): (expense:PersonalExpense):
     then BudgetTracker.decreaseTotalSpent(expense)
 ```
 
 ```
 sync editSpendingDecrease
-    when ExpenseTracking.editPersonalExpense(oldExpense:PersonalExpense):
+    when PersonalExpenseTracking.editPersonalExpense(oldExpense:PersonalExpense):
     then BudgetTracker.decreaseTotalSpent(expense:oldExpense)
 ```
 
 ```
 sync editSpendingIncrease
-    when ExpenseTracking.editPersonalExpense(): (newExpense:PersonalExpense):
+    when PersonalExpenseTracking.editPersonalExpense(): (newExpense:PersonalExpense):
     then BudgetTracker.addTotalSpent(expense:newExpense)
 ```
 
 ```
 sync createDebt
-    when ExpenseTracking.createGroup(members):(group:Group)
+    when GroupExpenseTracking.createGroup(members):(group:Group)
     then Debt.createDebt(userA, userB, group) between each possible pair of users in the set of members.
 ```
 
 ```
 sync addDebt
-    when ExpenseTracking.addPersonalExpense(user, payer, group, personalCost): ():
+    when PersonalExpenseTracking.addPersonalExpense(user, payer, group, personalCost): ():
     then Debt.updateDebt(payer:payer,receiver:user, group:group, cost:personalCost)
 ```
 ```
 sync removeDebt
-    when ExpenseTracking.deletePersonalExpense(user,payer,group,personalCost):()
+    when PersonalExpenseTracking.deletePersonalExpense(user,payer,group,personalCost):()
     then Debt.updateDebt(payer: user, receiver: payer, cost:personalCost)
 ```
 
@@ -346,21 +363,7 @@ sync budgetExceededNotif
     then notify the user that their budget has been exceeded
 ```
 
-```
-sync createHomeFolder
-    when Authentication.register():(user:User)
-    then Folder.createFolder(user:user,name:"home")
-```
-```
-sync addGroupToDash
-    when ExpenseTracking.createGroup(creator):(group:Group) >
-    then Folder.addToFolder(group:group, user:creator, folderName:"home")
-```
-```
-sync addSharedGroupToDash
-    when ExpenseTracking.addUser(friend):(group:Group) >
-    then Folder.addToFolder(group:group, user:friend, folderName:"home")
-```
+
 
 
 
