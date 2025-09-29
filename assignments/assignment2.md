@@ -74,16 +74,15 @@ concept Authentication
 ```
 
 ```
-concept ExpenseTracking
-    purpose allows users to group expenses and coordinate shared expenses/budgets
-    principle after a group is created, users can collaborate in the same group and add shared expenses to the group. each expense keeps track of who paid and who was covered. users can check how much they personally spent in a group.
+concept GroupExpenseTracking
+    purpose allows users to record and manage shared expenses within a group
+    principle after a group is created, users can add expenses to the group. each expense tracks the payer and the total cost, and how costs are divided between different users
     state
         a set of Groups with
             a name String
             a creator User
             a set of Users
-            a set of Debts
-            a set of Expenses
+            a set of GroupExpenses
 
         a set of GroupExpenses
             a title String
@@ -92,15 +91,7 @@ concept ExpenseTracking
             a totalCost Number
             a payer User
             a date Date
-            a set of PersonalExpenses
-
-        a set of PersonalExpenses
-            a date Date
-            a category String
-            a user User
-            a payer User
-            a personalCost Number
-
+            a debtMapping Map<User:Number>
 
     actions
         createGroup(groupName: String, creator: User, description: String): (group:Group)
@@ -119,33 +110,58 @@ concept ExpenseTracking
             requires owner exists, user exists, group exists, owner is in the group and is the owner of the group, user is in the group
             effect removes the user from the group
 
-        addExpense(payer:User, title:String, description:String, category: String, totalCost: Number, date:Date, debtMapping: Map<User:Number>):(expense:GroupExpense)
-            requires creator exists, totalCost is positive, the values (costs) of the debtMapping add up to the totalCost and all values are positive numbers.
-            effect: calls createPersonalExpense for every debt in the debtMapping with given group, category, date, user user in the mapping as the user, and the number the user maps to as the personalCost. Also, creates a GroupExpense with given payer, title, description category, totalCost, date, and the set of PersonalExpenses just created. Updates group's startDate/endDate based on the given date.
+        addGroupExpense(payer:User, group:Group, title:String, description:String, category:String, totalCost:Number, date:Date, debtMapping:Map<User:Number>): (expense:GroupExpense)
+            requires group and payer exist, payer is in group, totalCost > 0, all values in debtMapping are positive and sum to totalCost
+            effect creates a GroupExpense with the given details and stores it in the group
 
-        deleteExpense(payer: User, group:Group, groupExpense: GroupExpense): (groupExpense:GroupExpense)
-            requires payer and expense to exist, payer is the payer of the expense, and expense is in group.
-            effect deletes the groupExpense and all the PersonalExpenses associated with it.
+        editGroupExpense(payer:User, group:Group, oldExpense:GroupExpense, title:String, description:String, category:String, totalCost:Number, date:Date, debtMapping:Map<User:Number>): (newExpense:GroupExpense)
+            requires payer and oldExpense exist, oldExpense is in group, payer is the payer of oldExpense
+            effect updates the GroupExpense with the given details
 
-        editExpense(payer:User, oldExpense: GroupExpense, title:String, description:String, category: String, totalCost: Number, date:Date, debtMapping: Map<User:Number>): (newExpense:GroupExpense):
-            requires payer and oldExpense to exist and payer is the payer of the expense.
-            effect: updates the oldExpense with the new given arguments. calls editPersonalExpense on each old personalExpense associated with the oldExpense and updates each given the given arguments. If a personalExpense is no longer associated with the group expense, call deletePersonalExpense on it. The new groupExpense stores this set of new PersonalExpenses. Updates group's startDate/endDate based on the given date.
+        deleteGroupExpense(payer:User, group:Group, expense:GroupExpense): (expense:GroupExpense)
+            requires payer and expense exist, expense is in group, payer is the payer of expense
+            effect deletes the GroupExpense from the group
 
-        createPersonalExpense(user:User, payer: User, group:Group, category:String, date:Date, personalCost:Number):
-            requires user, payer, group to exist. user and payer are in group.
-            effect: creates a PersonalExpense with the given user, payer, group, category,date, and personalCost
+        getGroupSpendingByCategory(group:Group, category:String):(spending:Number)
+            requires group exists and contains expenses with the given category
+            effect sums the totalCost of all expenses with the given group and category.
+```
 
-        editPersonalExpense(oldPersonalExpense:PersonalExpense, group: Group, category:String,date:Date,personalCost:Number):
-            requires personalExpense exists and is associated with group.
-            effect: edits the PersonalExpense with the given user,payer, group, category,date, and personalCost
+```
 
-        deletePersonalExpense(personalExpense: PersonalExpense):
-            requires personalExpense to exist
-            effect: deletes the personalExpense.
+concept PersonalExpenseTracking
+    purpose allows users to track their own share of expenses, either within a group or individually
+    principle each personal expense belongs to a user and records how much they owe or paid for a given item
+    state
+        a set of PersonalExpenses
+            a title String
+            a user User
+            a payer User
+            a group Group
+            a category String
+            a date Date
+            a personalCost Number
 
-        getUserSpending(user:User,group:Group):(spending:Number)
-            requires user and group to exist, user is in group
-            effect gets all the PersonalExpenses associated with the user in the group, adds them up, and returns them.
+    actions
+        createPersonalExpense(user:User, payer:User, group:Group, category:String, date:Date, title: String, personalCost:Number): (expense:PersonalExpense)
+            requires user, payer, group exist, both user and payer are in the group. personalCost is a positive number.
+            effect creates a PersonalExpense with given details
+
+        editPersonalExpense(user:User, oldExpense:PersonalExpense, category:String, date:Date, personalCost:Number): (newExpense:PersonalExpense)
+            requires user and oldExpense exists and user is the payer of the expense
+            effect updates the PersonalExpense with given details
+
+        deletePersonalExpense(user:User, expense:PersonalExpense):(expense:PersonalExpense)
+            requires user and expense exists and user is the payer of the expense
+            effect deletes the PersonalExpense
+
+        deleteAllPersonalExpense(user:User, group:GroupExpense):(expense:PersonalExpense)
+            requires user and groupExpense exists and user is the payer of the expense
+            effect deletes all PersonalExpenses associated with the group
+
+        getUserSpending(user:User, group:Group): (spending:Number)
+            requires user and group exist, user is in group
+            effect sums the cost of all PersonalExpenses associated with user in group and returns the total
 ```
 
 ```
@@ -270,6 +286,18 @@ concept Folder
 ```
 
 ### syncs
+```
+sync CreatePersonalExpensesFromGroup
+    when GroupExpenseTracking.addGroupExpense(debtMapping:Map<User:Number>):(groupExpense:GroupExpense)
+    then for each (user, cost) in debtMapping
+        PersonalExpenseTracking.createPersonalExpense(user=user, payer=groupExpense.payer, title=groupExpense.title, group=groupExpense.group, category=groupExpense.category, date=groupExpense.date, personalCost=cost)
+```
+
+```
+sync DeletePersonalExpensesFromGroup
+    when GroupExpenseTracking.deleteGroupExpense(groupExpense)
+    then PersonalExpenseTracking.deleteAllPersonalExpense(groupExpense)
+```
 
 ```
 sync trackSpending
@@ -282,7 +310,6 @@ sync removeSpending
     when ExpenseTracking.deletePersonalExpense(): (expense:PersonalExpense):
     then BudgetTracker.decreaseTotalSpent(expense)
 ```
-
 
 ```
 sync editSpendingDecrease
